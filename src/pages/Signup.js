@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {auth, provider} from '../firebase-config';
-import {signInWithPopup, signOut} from 'firebase/auth';
+import {signInWithPopup} from 'firebase/auth';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { addDoc, collection} from 'firebase/firestore';
@@ -68,6 +68,8 @@ function SignUp() {
                 await addDoc(userCollectionRef, {userId: createdUserResult.user.uid, fullName: fullName, username: username.toLowerCase(), emailAddress: email, following: [], followers: [], dateCreated: Date.now()});
 
                 navigate('/');
+                setIsAuth(true);
+                localStorage.setItem("isAuth", true);
             } catch(error) {
                 setFullName('');
                 setUsername('');
