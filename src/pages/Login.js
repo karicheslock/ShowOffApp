@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import {auth, provider} from '../firebase-config';
 import {signInWithPopup, signInWithEmailAndPassword} from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
-import { db } from '../firebase-config';
-import { collection } from 'firebase/firestore';
 import Navbar from '../components/Navbar';;
 
 function Login() {
@@ -14,8 +12,6 @@ function Login() {
     const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
 
     const navigate = useNavigate();
-
-    const userCollectionRef = collection(db, "users");
 
     const isInvalid = email === '' || password === '';
     
@@ -97,6 +93,7 @@ function Login() {
                             >
                                 Login
                             </button>
+                            <p className='text-sm mt-2'>Forgot your password?  Click <Link to='/reset-password' className='font-bold text-amber-400 hover:text-yellow-800'>here</Link></p>
                         </form>
                     </div>
                     <div className='flex justify-center items-center flex-col w-full bg-white p-4 border-2 border-amber-400 rounded'>

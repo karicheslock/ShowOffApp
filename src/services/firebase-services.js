@@ -1,5 +1,5 @@
 import { db } from '../firebase-config';
-import { query, getDocs, where, collection, limit, updateDoc, arrayRemove, arrayUnion, doc } from 'firebase/firestore';
+import { query, getDocs, where, collection } from 'firebase/firestore';
 
 export async function doesUsernameExist(username) {
     const q = query(collection(db, 'users'), where('username', '==', username));
