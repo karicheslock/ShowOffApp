@@ -5,7 +5,8 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { addDoc, collection} from 'firebase/firestore';
 import { db } from '../firebase-config';
-//import { doesUsernameExist } from '../services/firebase';
+import { passwordStrength } from 'check-password-strength';
+import { doesUsernameExist, doesEmailExist } from '../services/firebase-services';
 
 
 function SignUp() {
@@ -13,18 +14,23 @@ function SignUp() {
     const [fullName, setFullName] = useState('');
     const [username, setUsername] = useState(''); 
     const [email, setEmail] = useState('');
+    const [confirmEmail, setConfirmEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isAuth, setIsAuth] = useState(localStorage.getItem("isAuth"));
 
     const navigate = useNavigate();
-
-    const userCollectionRef = collection(db, "users");
-
-    const isInvalid = fullName === '' || username === '' || email === '' || password === '';
     
+
+    const isEmailInvalid = email !== confirmEmail;
+    const isPasswordInvalid = password !== confirmPassword;
+    const isPasswordWeak = passwordStrength(password).value !== 'Strong';
+    const isInvalid = username === '' || fullName === '' || email === '' || password === '' || isEmailInvalid || isPasswordInvalid || isPasswordWeak;
+        
     const signInWithGoogle = () => {
-            signInWithPopup(auth, provider).then((result) => {
+        const userCollectionRef = collection(db, "users");
+        signInWithPopup(auth, provider).then((result) => {
             localStorage.setItem("isAuth", true);
             setIsAuth(true);
             const user = result.user;
@@ -36,28 +42,36 @@ function SignUp() {
     
     const handleFullNameChange = event => {
         setFullName(event.target.value);
-    }
+    };
 
     const handleUsernameChange = event => {
         setUsername(event.target.value.toLowerCase().trim());
-    }
+    };
 
     const handleEmailChange = event => {
         setEmail(event.target.value.toLowerCase().trim());
-    }
+    };
+
+    const handleConfirmEmailChange = event => {
+        setConfirmEmail(event.target.value.toLowerCase().trim());
+    };
 
     const handlePasswordChange = event => {
         setPassword(event.target.value);
-    }
+    };
+
+    const handleConfirmPasswordChange = event => {
+        setConfirmPassword(event.target.value);
+    };
 
     const handleSubmit = async event => {
         event.preventDefault();
+        
+        const userCollectionRef = collection(db, "users");
+        const usernameExists = doesUsernameExist(username);
+        const emailExists = doesEmailExist(email);
 
-        //const usernameExists = doesUsernameExist(username);
-        //fix this!
-        const usernameExists = false;
-
-        if(!(await usernameExists).length) {
+        if(!(await usernameExists).length && !(await emailExists).length) {
             try {
                 const createdUserResult = await createUserWithEmailAndPassword(auth, email, password);
 
@@ -74,17 +88,29 @@ function SignUp() {
                 setFullName('');
                 setUsername('');
                 setEmail('');
+                setConfirmEmail('');
                 setPassword('');
+                setConfirmPassword('');
                 setError(error.message);
             }
-        } else {
+        } else if ((await usernameExists).length) {
             setFullName('');
             setUsername('');
             setEmail('');
+            setConfirmEmail('');
             setPassword('');
+            setConfirmPassword('');
             setError('That username is already taken, please try a different one');
+        } else if ((await emailExists).length) {
+            setFullName('');
+            setUsername('');
+            setEmail('');
+            setConfirmEmail('');
+            setPassword('');
+            setConfirmPassword('');
+            setError('An account associated with that email address already exists, please login instead');
         }
-    }
+    };
 
     useEffect(() => {
         document.title = 'Signup - ShowOff';
@@ -123,6 +149,7 @@ function SignUp() {
                                 onChange={handleUsernameChange}
                                 value={username}
                             />
+
                             <input 
                                 aria-label='Enter your email address'
                                 className='text-sm w-full mr-3 py-5 px-4 h-2 border-2 border-yellow-800 rounded mb-2'
@@ -133,6 +160,18 @@ function SignUp() {
                                 value={email}
                             />
                             <input 
+                                aria-label='Confirm your email address'
+                                className='text-sm w-full mr-3 py-5 px-4 h-2 border-2 border-yellow-800 rounded mb-2'
+                                type='email'
+                                name='email'
+                                placeholder='Confirm Email Address'
+                                onChange={handleConfirmEmailChange}
+                                value={confirmEmail}
+                            />
+
+                            {isEmailInvalid &&  <p className='text-xs text-red-500'>Email addresses don&apos;t match</p>}
+
+                            <input 
                                 aria-label='Enter your password'
                                 className='text-sm w-full mr-3 py-5 px-4 h-2 border-2 border-yellow-800 rounded mb-2'
                                 type='password'
@@ -141,6 +180,19 @@ function SignUp() {
                                 onChange={handlePasswordChange}
                                 value={password}
                             />
+                            <input 
+                                aria-label='Confirm your password'
+                                className='text-sm w-full mr-3 py-5 px-4 h-2 border-2 border-yellow-800 rounded mb-2'
+                                type='password'
+                                name='password'
+                                placeholder='Confirm Password'
+                                onChange={handleConfirmPasswordChange}
+                                value={confirmPassword}
+                            />
+
+                            {isPasswordWeak && password !=='' && <p className='text-xs text-red-500'>Need a strong password</p>}
+                            {isPasswordInvalid &&  <p className='text-xs text-red-500'>Passwords don&apos;t match</p>}
+
                             <button
                                 type='submit'
                                 className={`bg-amber-400 text-white w-full rounded h-8 font-bold ${isInvalid && 'cursor-not-allowed opacity-50'}`}
