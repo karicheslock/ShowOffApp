@@ -3,7 +3,7 @@ import {auth, provider} from '../firebase-config';
 import {signInWithPopup} from 'firebase/auth';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
-import { addDoc, collection} from 'firebase/firestore';
+import { addDoc, collection, query, getDocs, where} from 'firebase/firestore';
 import { db } from '../firebase-config';
 import { passwordStrength } from 'check-password-strength';
 import { doesUsernameExist, doesEmailExist } from '../services/firebase-services';
@@ -28,17 +28,24 @@ function SignUp() {
     const isPasswordWeak = passwordStrength(password).value !== 'Strong';
     const isInvalid = username === '' || fullName === '' || email === '' || password === '' || isEmailInvalid || isPasswordInvalid || isPasswordWeak;
         
-    const signInWithGoogle = () => {
-        const userCollectionRef = collection(db, "users");
-        signInWithPopup(auth, provider).then((result) => {
+    const signInWithGoogle = async () => {
+        try {
+            const res = await signInWithPopup(auth, provider);
+            const user = res.user;
+            const userCollectionRef = collection(db, "users");
+            const q = query(userCollectionRef, where("uid", "==", user.uid));
+            const docs = await getDocs(q);
+            if (docs.docs.length === 0) {
+                await addDoc(userCollectionRef, {userId: user.uid, fullName: user.displayName, username: user.displayName.toLowerCase().replace(/\s/g, ''), emailAddress: user.email, authProvider: "google", following: [], followers: [], dateCreated: Date.now()});
+            }
             localStorage.setItem("isAuth", true);
             setIsAuth(true);
-            const user = result.user;
-            addDoc(userCollectionRef, {userId: user.uid, fullName: user.displayName, username: user.displayName.toLowerCase().replace(/\s/g, ''), emailAddress: user.email, following: [], followers: [], dateCreated: Date.now()});
             navigate('/');
-        });
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        }
     };
-  
     
     const handleFullNameChange = event => {
         setFullName(event.target.value);
@@ -79,7 +86,7 @@ function SignUp() {
                     displayName: username
                 });
 
-                await addDoc(userCollectionRef, {userId: createdUserResult.user.uid, fullName: fullName, username: username.toLowerCase(), emailAddress: email, following: [], followers: [], dateCreated: Date.now()});
+                await addDoc(userCollectionRef, {userId: createdUserResult.user.uid, fullName: fullName, username: username.toLowerCase(), emailAddress: email, authProvider: "local", following: [], followers: [], dateCreated: Date.now()});
 
                 navigate('/');
                 setIsAuth(true);

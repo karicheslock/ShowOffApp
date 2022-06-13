@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
-import {getAuth, sendPasswordResetEmail} from 'firebase/auth';
+import {sendPasswordResetEmail} from 'firebase/auth';
+import {auth} from '../firebase-config';
 
 function ResetPassword() {
 
@@ -13,17 +14,21 @@ function ResetPassword() {
         setEmail(event.target.value);
     }
 
+    const sendPasswordReset = async (email) => {
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert("Password reset link sent!");
+        } catch (error) {
+            setError(error);
+            console.error(error);
+            alert(error.message);
+        }
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
-
-        const auth = getAuth();
-        const user = auth.currentUser;
-        console.log(user)
-
-        if (user) {
-            console.log(user.emailAddress)
-        }
-
+        sendPasswordReset(email);
+        console.log(email)
         setIsHidden(true);
     }
 
@@ -61,7 +66,7 @@ function ResetPassword() {
                             </form>
                         </div>}
 
-                        {isHidden && <p>Message sent!  Please check your email to reset your password.</p>}
+                        {isHidden && <p>Message sent!  Please check your email to reset your password.  Please check your spam folder if you do not receive the reset email within a few minutes.</p>}
 
                     </div>
                 </div>
