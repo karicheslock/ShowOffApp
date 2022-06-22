@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import { db, auth, storage } from '../firebase-config';
 import { useNavigate } from 'react-router-dom';
-import { ref, uploadBytesResumable, getDownloadURL} from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL, listAll, list} from 'firebase/storage';
 
 function CreateCollection() {
 
@@ -43,10 +43,19 @@ function CreateCollection() {
         setDescription(event.target.value);
     }
 
-    const handleImageChange = (event) => {
+    const handleImageChange = async (event) => {
         event.preventDefault();
         const file = event.target[0].files[0];
         uploadFiles(file);
+        const imageName = event.target[0].files[0].name
+        await getDownloadURL(ref(storage, imageName))
+            .then((url) => {
+                setImageArray(imageArray => [
+                    ...imageArray,
+                    url
+                ])
+            })
+        console.log(imageArray)
     };
 
     const uploadFiles = (file) => {
@@ -63,7 +72,6 @@ function CreateCollection() {
         () => {
             getDownloadURL(uploadTask.snapshot.ref)
                 .then(url => setImageURL(url))
-                .then(setImageArray([imageURL]))
         }
         );
     };
