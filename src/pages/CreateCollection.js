@@ -47,8 +47,8 @@ function CreateCollection() {
         event.preventDefault();
         const file = event.target[0].files[0];
         uploadFiles(file);
-        const imageName = event.target[0].files[0].name
-        await getDownloadURL(ref(storage, imageName))
+        const imageName = event.target[0].files[0].name;
+        await getDownloadURL(ref(storage, `gs://showoff-app-2f072.appspot.com/${imageName}`))
             .then((url) => {
                 setImageArray(imageArray => [
                     ...imageArray,
@@ -70,7 +70,7 @@ function CreateCollection() {
         },
         (err) => console.log(err),
         () => {
-            getDownloadURL(uploadTask.snapshot.ref)
+             getDownloadURL(uploadTask.snapshot.ref)
                 .then(url => setImageURL(url))
         }
         );
