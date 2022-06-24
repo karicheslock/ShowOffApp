@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import { db, auth, storage } from '../firebase-config';
 import { useNavigate } from 'react-router-dom';
-import { ref, uploadBytesResumable, getDownloadURL, listAll, list} from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL} from 'firebase/storage';
 
 function CreateCollection() {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [imageURL, setImageURL] = useState(null);
     const [imageArray, setImageArray] = useState([]);
     const [progress, setProgress] = useState(0);
 
@@ -47,15 +46,6 @@ function CreateCollection() {
         event.preventDefault();
         const file = event.target[0].files[0];
         uploadFiles(file);
-        const imageName = event.target[0].files[0].name;
-        await getDownloadURL(ref(storage, `gs://showoff-app-2f072.appspot.com/${imageName}`))
-            .then((url) => {
-                setImageArray(imageArray => [
-                    ...imageArray,
-                    url
-                ])
-            })
-        console.log(imageArray)
     };
 
     const uploadFiles = (file) => {
@@ -71,7 +61,12 @@ function CreateCollection() {
         (err) => console.log(err),
         () => {
              getDownloadURL(uploadTask.snapshot.ref)
-                .then(url => setImageURL(url))
+                .then(url => {
+                    setImageArray([
+                        ...imageArray,
+                        url
+                    ]);
+                })
         }
         );
     };
