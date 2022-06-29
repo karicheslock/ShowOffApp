@@ -15,6 +15,8 @@ function CreateCollection() {
 
     const isAuth = localStorage.getItem('isAuth');
 
+    const isInvalid = title === '' || description === '' || imageArray.length === 0;
+
     const createUserCollection = async (event) => {
         event.preventDefault();
 
@@ -44,7 +46,7 @@ function CreateCollection() {
 
     const handleImageChange = async (event) => {
         event.preventDefault();
-        const file = event.target[0].files[0];
+        let file = event.target[0].files[0];
         uploadFiles(file);
     };
 
@@ -82,14 +84,14 @@ function CreateCollection() {
     }, [])
 
   return (
-    <div className='container flex flex-col items-center h-screen bg-amber-50'>
+    <div className='container flex flex-col items-center h-full bg-amber-50'>
         <div className='flex flex-col justify-center'>
-            <div className='flex flex-col border-4 border-amber-900 p-4 bg-amber-100'>
+            <div className='flex flex-col border-4 border-amber-900 p-4 bg-amber-100 w-3/4 mx-auto'>
             <p className='font-blaka-hollow text-6xl text-amber-400 tracking-wide text-center mb-5'><span className='text-8xl'>S</span>how<span className='text-8xl'>O</span>ff</p>
                 <label className='mb-2 text-xl text-amber-900 font-bold'>Name your collection:</label>
                 <input aria-label='Enter a title' placeholder='Name...' onChange={handleTitleChange} className='text-xl p-2 rounded' />
                 <label className='mb-2 mt-2 text-xl text-amber-900 font-bold'>Describe your collection:</label>
-                <textarea aria-label='Enter a description' placeholder="Description... (max 250 characters)" onChange={handleDescriptionChange} className='text-xl p-2 h-48 rounded' maxLength={250} />
+                <textarea aria-label='Enter a description' placeholder="Description... (max 250 characters)" onChange={handleDescriptionChange} className='text-xl p-2 h-24 rounded' maxLength={250} />
                 <div className='flex flex-col items-center justify-center mt-4'>
                     <form method="POST" onSubmit={handleImageChange}>
                         <div className='mb-4 leading-10'><label className='text-xl text-amber-900 font-bold'>1. Click the <span className='border-2 border-gray-500 text-black bg-gray-100 px-1'>Choose File</span> button to start adding images. 
@@ -97,12 +99,20 @@ function CreateCollection() {
                         <br />  3. Click the <span className='border-2 rounded border-amber-800 px-4 py-1 bg-amber-900 text-amber-50 text-xl font-bold'>Create Collection</span> button when you have added all images.</label></div>
                         <div className='flex justify-between'>
                             <input type="file" id='input-btn' className='input text-amber-900 font-bold text-xl' aria-label='Select file' />
-                            <button type='submit' className='border-2 rounded border-amber-400 px-4 py-1 bg-amber-500 text-amber-50 text-xl font-bold hover:bg-amber-900'>Upload</button>
+                            <div>
+                                <button type='submit' className='border-2 rounded border-amber-400 px-4 py-1 bg-amber-500 text-amber-50 text-xl font-bold hover:bg-amber-900'>Upload</button>
+                                <h3 className='mb-4 text-amber-900'>Uploaded {progress} %</h3>
+                            </div>
                         </div>
+                        {(imageArray.length > 0) && <div className='mb-4 leading-10 text-xl text-amber-900 font-bold'>4. Add another image with the <span className='border-2 border-gray-500 text-black bg-gray-100 px-1'>Choose File</span> button.</div>}
                     </form>
-                    <div className='ml-auto'><h3 className='mb-4 text-amber-900'>Uploaded {progress} %</h3></div>
                 </div>
-                <button onClick={createUserCollection} className='border-2 rounded border-amber-800 px-4 py-1 bg-amber-900 text-amber-50 text-xl font-bold hover:bg-amber-500 w-fit mx-auto'>Create Collection</button>
+                <div className='flex flex-wrap mb-4'>
+                    {(imageArray.length > 0) && imageArray.map((image) => (
+                        <img src={image} alt='Collection display' className='w-1/12 h-max mx-1 border-2 border-amber-900 rounded my-2' />
+                    )) }
+                </div>
+                <button onClick={createUserCollection} className={`border-2 rounded border-amber-800 px-4 py-1 bg-amber-900 text-amber-50 text-xl font-bold hover:bg-amber-500 w-fit mx-auto ${isInvalid && 'cursor-not-allowed opacity-50'}`}>Create Collection</button>
                 <button onClick={() => navigate('/')} className='text-red-500 font-bold mt-2 hover:text-red-700'>Cancel</button>
             </div>
         </div>

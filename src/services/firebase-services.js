@@ -14,3 +14,10 @@ export async function doesEmailExist(email) {
 
     return result.docs.map((user) => user.data().length > 0);
 };
+
+export async function getAllCollections() {
+    const q = query(collection(db, 'userCollections'));
+    const result = await getDocs(q);
+
+    return result;
+}
