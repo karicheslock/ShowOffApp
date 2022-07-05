@@ -24,19 +24,6 @@ function Dashboard() {
   }, [myCollection]);
 
   useEffect(() => {
-    const images = onSnapshot(collection(db, 'userCollections'), (querySnapshot) => {
-      const documents = querySnapshot.docs.map((doc) => {
-        return {
-          ...doc.data(),
-          id: doc.id
-        }
-      });
-      setUserCollectionsArray(documents);
-    });
-    return () => images();
-  }, []);
-
-  useEffect(() => {
     document.title = 'Dashboard - ShowOff';
   }, [] );
 
