@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase-config';
 import { Link } from 'react-router-dom';
+import VoteButtons from "../components/VoteButtons";
 
 function Dashboard() {
 
@@ -44,6 +45,7 @@ function Dashboard() {
                   ))}
                   {(userCollection.imageArray.length > 3) && <Link to='/profile/:username' className="text-amber-900 underline decoration-solid decoration-amber-900 hover:text-amber-400 hover:decoration-amber-400">Click here to see the rest of this collection</Link>}
                 </div>
+                <VoteButtons userCollection={userCollection} />
               </div>
             )
           })}

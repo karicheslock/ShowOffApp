@@ -28,7 +28,10 @@ function CreateCollection() {
                 description,
                 author: { name: auth.currentUser.displayName, id: auth.currentUser.uid },
                 imageArray,
-                created: Timestamp.now()
+                upVotesCount: 0,
+                downVotesCount: 0,
+                created: Timestamp.now(),
+                updated: Timestamp.now(),
             });
             navigate('/');
         } catch (error) {
