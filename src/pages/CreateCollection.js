@@ -28,8 +28,8 @@ function CreateCollection() {
                 description,
                 author: { name: auth.currentUser.displayName, id: auth.currentUser.uid },
                 imageArray,
-                upVotesCount: 0,
-                downVotesCount: 0,
+                upVotesUsers: [],
+                downVotesUsers: [],
                 created: Timestamp.now(),
                 updated: Timestamp.now(),
             });
